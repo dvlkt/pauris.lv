@@ -20,7 +20,7 @@ def edit_form():
     if data == None:
         return '{"successful": false}'
 
-    if 'id' not in flask.session or flask.session['id'] != id:
+    if 'id' not in flask.session or flask.session['id'] != data['id']:
         return '{"successful": false}'
 
     db.modify_form(data["id"], data["name"], data["questions"])

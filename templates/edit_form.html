@@ -33,6 +33,7 @@
 
 <script type="text/javascript">
     let data = {{ questions|tojson }};
+
     let questionWrapper = document.querySelector("#questions");
 
     const addQuestion = () => {
@@ -128,13 +129,11 @@
         }
         fetch("/api/edit_form", {
             method: "POST",
-            mode: "cors",
-            credentials: "include",
             headers: new Headers({ "content-type": "application/json" }),
             body: JSON.stringify({
                 id: "{{ id }}",
-                name: document.querySelector("#title").innerText,
-                questions: data,
+                name: document.querySelector("input#title").value,
+                questions: saveData,
             }),
         }).then(async (res) => {
             let response = await res.json();
