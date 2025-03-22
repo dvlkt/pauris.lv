@@ -1,0 +1,69 @@
+<style>
+    label {
+        display: block;
+        min-height: 1rem;
+        min-width: 10rem;
+    }
+</style>
+
+<h1 id="title" contenteditable>Jauna veidlapa</h1>
+
+<div id="form"></div>
+
+<button onclick="add_field('short_text')">+ īsa teksta lauks</button>
+
+<button onclick="publishDialog.showModal()">Izveidot</button>
+
+<p>&copy; portāls (forums?) Pauris.lv, 2025</p>
+
+<dialog id="publish-dialog">
+    <p>
+        Izveidojiet paroli, lai pēc tam varētu piekļūtu veidlapas rezultātiem:
+    </p>
+
+    <input type="text" id="password" />
+
+    <button onclick="create()">Izveidot</button>
+</dialog>
+
+<script type="text/javascript">
+    let publishDialog = document.querySelector("dialog#publish-dialog");
+    let form = document.querySelector("#form");
+
+    const add_field = (type) => {
+        let id = Math.floor(Math.random() * 1000000);
+
+        if (type === "short_text") {
+            form.innerHTML += `
+                <div class="question" id="${id}" data-type="short_text">
+                    <p contenteditable>Jautājums</p>
+                </div>
+            `;
+        }
+    };
+
+    const create = () => {
+        let data = [];
+        for (let element of document.querySelectorAll(".question")) {
+            data.push({
+                id: element.id,
+                type: element.getAttribute("data-type"),
+                text: element.querySelector("p").innerText,
+            });
+        }
+        fetch("/api/create_form", {
+            method: "POST",
+            headers: new Headers({ "content-type": "application/json" }),
+            body: JSON.stringify({
+                name: document.querySelector("#title").innerText,
+                password: document.querySelector("#password").value,
+                questions: data,
+            }),
+        }).then(async (res) => {
+            let response = await res.json();
+            if (response.successful) {
+                window.location.href = response.id;
+            }
+        });
+    };
+</script>

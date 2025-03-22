@@ -1,0 +1,72 @@
+<style>
+    input {
+        display: block;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<button onclick="loginDialog.showModal()">Rediģēt</button>
+
+<h1>{{ name }}</h1>
+
+<div id="form"></div>
+
+<button onclick="submit()">Iesniegt</button>
+
+<p>
+    Izveidots, izmantojot
+    <a href="{{ url_for('home') }}">pauris.lv veidlapu veidotāju</a>. &copy;2025
+</p>
+
+<dialog id="login">
+    <p>Lai rediģētu veidlapu, ievadi paroli:</p>
+    <input type="text" id="password" />
+    <button onclick="login()">Rediģēt</button>
+</dialog>
+
+<script type="text/javascript">
+    let loginDialog = document.querySelector("dialog#login");
+
+    let data = {{ questions|tojson }};
+    let form = document.querySelector("#form");
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].type == "short_text") {
+            form.innerHTML += `
+                <label for="${data[i].id}">${data[i].text}</label>
+                <input name="${data[i].id}" type="text" />
+            `;
+        }
+    }
+
+    const submit = () => {
+        let answers = {};
+        for (let i = 0; i < data.length; i++) {
+            let val = document.querySelector(`[name="${data[i].id}"]`).value;
+            answers[data[i].id] = val;
+        }
+        fetch("/api/fill_form", {
+            method: "POST",
+            headers: new Headers({ "content-type": "application/json" }),
+            body: JSON.stringify({
+                id: "{{ id }}",
+                answers
+            }),
+        });
+    }
+
+    const login = () => {
+        fetch("/api/login", {
+            method: "POST",
+            headers: new Headers({ "content-type": "application/json" }),
+            body: JSON.stringify({
+                id: "{{ id }}",
+                password: document.querySelector("#password").value
+            }),
+        }).then(async (res) => {
+            response = await res.json();
+            if (response.successful) {
+                window.location.reload();
+            }
+        });
+    }
+</script>

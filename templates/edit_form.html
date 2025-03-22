@@ -1,0 +1,74 @@
+<style>
+    label {
+        display: block;
+        min-height: 1rem;
+        min-width: 10rem;
+    }
+</style>
+
+<button onclick="logout()"><- Iziet no rediģēšanas</button>
+
+<h1 id="title" contenteditable>{{ name }}</h1>
+
+<div id="form"></div>
+
+<button onclick="add_field('short_text')">+ īsa teksta lauks</button>
+
+<button onclick="save()">Saglabāt</button>
+
+<script type="text/javascript">
+    let data = {{ questions|tojson }};
+    let form = document.querySelector("#form")
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].type == "short_text") {
+            form.innerHTML += `
+                <div class="question" id="${data[i].id}" data-type="short_text">
+                    <p contenteditable>${data[i].text}</p>
+                </div>
+            `;
+        }
+    }
+
+    const add_field = (type) => {
+        let id = Math.floor(Math.random() * 1000000);
+
+        if (type === "short_text") {
+            form.innerHTML += `
+                <div class="question" id="${id}" data-type="short_text">
+                    <p contenteditable>Jautājums</p>
+                </div>
+            `;
+        }
+    };
+
+    const save = () => {
+        let data = [];
+        for (let element of document.querySelectorAll(".question")) {
+            data.push({
+                id: element.id,
+                type: element.getAttribute("data-type"),
+                text: element.querySelector("p").innerText,
+            });
+        }
+        fetch("/api/edit_form", {
+            method: "POST",
+            headers: new Headers({ "content-type": "application/json" }),
+            body: JSON.stringify({
+                id: "{{ id }}",
+                name: document.querySelector("#title").innerText,
+                questions: data,
+            }),
+        }).then(async (res) => {
+            let response = await res.json();
+            if (response.successful) {
+                window.location.reload();
+            }
+        });
+    };
+
+    const logout = () => {
+        fetch("/api/logout", { method: "POST" }).then(async () => {
+            window.location.reload();
+        });
+    }
+</script>
