@@ -7,9 +7,9 @@
 <main class="edit-form">
     <input id="title" placeholder="Veidlapas virsraksts" value="Jauna veidlapa" />
 
-    <div id="form"></div>
+    <div id="questions"></div>
 
-    <button onclick="add_field()">+ Pievienot jautājumu</button>
+    <button onclick="addQuestion()">+ Pievienot jautājumu</button>
 
     <button class="centered" onclick="publishDialog.showModal()">Izveidot</button>
 </main>
@@ -30,29 +30,66 @@
 
 <script type="text/javascript">
     let publishDialog = document.querySelector("dialog#publish-dialog");
-    let form = document.querySelector("#form");
+    let questionWrapper = document.querySelector("#questions");
 
-    const add_field = () => {
+    const addQuestion = () => {
         let id = Math.floor(Math.random() * 1000000);
 
-        form.innerHTML += `
-            <div class="question" id="${id}">
-                <input type="text" placeholder="Jautājums" value="Jautājums #${form.children.length + 1}">
-                <select>
+        questionWrapper.insertAdjacentHTML("beforeend", `
+            <div class="question" data-id="${id}" data-type="short_text">
+                <input type="text" placeholder="Jautājums" value="Jautājums #${questionWrapper.children.length + 1}">
+
+                <select onchange="onQuestionTypeChange(${id})">
                     <option data-type="short_text">Īss teksta lauks</option>
+                    <option data-type="long_text">Garš teksta lauks</option>
+                    <option data-type="multiple_choice">Izvēles varianti</option>
+                    <option data-type="checkbox">Izvēles rūtiņas</option>
                 </select>
+
+                <div class="question-options">
+                    <div></div>
+                    <button onclick="addOption(${id})">+ Jauna izvēle</button>
+                </div>
             </div>
-        `;
+        `);
+
+        onQuestionTypeChange(id);
     };
+
+    const onQuestionTypeChange = (id) => {
+        let dataType = document.querySelector(`.question[data-id="${id}"] option:nth-child(${document.querySelector(`.question[data-id="${id}"] select`).selectedIndex+1})`).getAttribute("data-type");
+        document.querySelector(`.question[data-id="${id}"]`).setAttribute("data-type", dataType);
+
+        if (dataType == "multiple_choice" || dataType == "checkbox") {
+            document.querySelector(`.question[data-id="${id}"] .question-options`).style.display = "block";
+        } else {
+            document.querySelector(`.question[data-id="${id}"] .question-options`).style.display = "none";
+        }
+    }
+
+    const addOption = (id) => {
+        let optionsWrapper = document.querySelector(`.question[data-id="${id}"] .question-options div`);
+        optionsWrapper.insertAdjacentHTML("beforeend", `
+            <input placeholder="Izvēle" value="Izvēle #${optionsWrapper.children.length + 1}" />
+        `);
+    }
 
     const create = () => {
         let data = [];
         for (let element of document.querySelectorAll(".question")) {
-            data.push({
-                id: element.id,
-                type: element.querySelector(`option:nth-child(${element.querySelector("select").selectedIndex+1})`).getAttribute("data-type"),
+            let question = {
+                id: element.getAttribute("data-id"),
+                type: element.getAttribute("data-type"),
                 text: element.querySelector("input").value,
-            });
+            };
+            if (question.type == "multiple_choice" || question.type == "checkbox") {
+                let options = [];
+                for (let optionElement of element.querySelectorAll(".question-options input")) {
+                    options.push(optionElement.value);
+                }
+                question.options = options;
+            }
+            data.push(question);
         }
         fetch("/api/create_form", {
             method: "POST",

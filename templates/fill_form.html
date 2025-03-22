@@ -33,19 +33,58 @@
     let form = document.querySelector("#form");
     for (let i = 0; i < data.length; i++) {
         if (data[i].type == "short_text") {
-            form.innerHTML += `
-                <div class="question" data-type="${data[i].type}">
+            form.insertAdjacentHTML("beforeend", `
+                <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
                     <label for="${data[i].id}">${data[i].text}</label>
-                    <input name="${data[i].id}" type="text" />
+                    <input id="${data[i].id}" name="${data[i].id}" type="text" />
                 </div>
-            `;
+            `);
+        } else if (data[i].type == "long_text") {
+            form.insertAdjacentHTML("beforeend", `
+                <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
+                    <label for="${data[i].id}">${data[i].text}</label>
+                    <textarea id="${data[i].id}" name="${data[i].id}" type="text"></textarea>
+                </div>
+            `);
+        } else if (data[i].type == "multiple_choice" || data[i].type == "checkbox") {
+            form.insertAdjacentHTML("beforeend", `
+                <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
+                    <label>${data[i].text}</label>
+                    <div class="options"></div>
+                </div>
+            `);
+            let element = document.querySelector(`.question[data-id="${data[i].id}"]`);
+            for (let o = 0; o < data[i].options.length; o++) {
+                let optionId = Math.random() * 100000000;
+                element.querySelector(".options").insertAdjacentHTML("beforeend", `
+                    <input type="${data[i].type == "multiple_choice" ? "radio" : "checkbox"}" id="${optionId}" name="${data[i].id}" />
+                    <label for="${optionId}">${data[i].options[o]}</label>
+                    <br />
+                `);
+            }
         }
     }
 
     const submit = () => {
         let answers = {};
         for (let i = 0; i < data.length; i++) {
-            let val = document.querySelector(`[name="${data[i].id}"]`).value;
+            let questionElement = document.querySelector(`.question[data-id="${data[i].id}"]`);
+            let type = questionElement.getAttribute("data-type");
+            let val;
+
+            if (type == "short_text") {
+                val = questionElement.querySelector(`input`).value;
+            } else if (type == "long_text") {
+                val = questionElement.querySelector(`textarea`).value;
+            } else if (type == "multiple_choice") {
+                val = questionElement.querySelector(`.options label[for="${questionElement.querySelector(`.options input:checked`).id}"]`).innerText;
+            } else if (type == "checkbox") {
+                val = [];
+                for (let checked of questionElement.querySelectorAll(`.options input:checked`)) {
+                    val.push(questionElement.querySelector(`.options label[for="${checked.id}"]`).innerText);
+                }
+            }
+
             answers[data[i].id] = val;
         }
         fetch("/api/fill_form", {
