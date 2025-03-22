@@ -1,0 +1,141 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    font-family: "Inter", sans-serif;
+}
+
+main, footer {
+    width: 300px;
+    margin: auto;
+}
+@media (min-width: 1280px) {
+    main, footer {
+        width: 700px;
+    }
+}
+
+main {
+    margin-top: 1rem;
+}
+footer {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #808080;
+}
+
+::selection {
+    background: #62adf3;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+input, select {
+    font-size: 1rem;
+    padding: .3rem .5rem;
+    border: solid 1px #d3d3d3;
+    border-radius: .4rem;
+    background: #fff;
+    box-shadow: 0 .03rem .1rem 0 #d0d0d080;
+    display: block;
+    transition: box-shadow .2s, border .2s, color .2s, background .2s;
+}
+input:focus {
+    outline: none;
+    border: solid 1px #2c99ff;
+    box-shadow: 0 .07rem .4rem 0 #d0d0d080;
+}
+input::placeholder {
+    color: #808080;
+}
+input:disabled, select:disabled {
+    opacity: .75;
+}
+select:hover {
+    box-shadow: 0 .07rem .4rem 0 #d0d0d080;
+    border: solid 1px #cccccc;
+    color: #000;
+    background: #f5f5f5;
+    cursor: pointer;
+}
+
+button {
+    font-size: 1rem;
+    font-weight: 500;
+    padding: .3rem .7rem;
+    border: solid 1px #d3d3d3;
+    border-radius: .4rem;
+    background: #fbfbfb;
+    color: #262626;
+    box-shadow: 0 .03rem .1rem 0 #d0d0d080;
+    transition: box-shadow .2s, border .2s, color .2s, background .2s;
+}
+button:hover {
+    box-shadow: 0 .07rem .4rem 0 #d0d0d080;
+    border: solid 1px #cccccc;
+    color: #000;
+    background: #f5f5f5;
+    cursor: pointer;
+}
+button.centered {
+    display: block;
+    margin: auto;
+}
+
+dialog {
+    border: none;
+    border-radius: 1rem;
+    margin: auto;
+    box-shadow: 0 0 2rem 0 #00000025;
+}
+dialog input {
+    margin-top: .2rem;
+    margin-bottom: .5rem;
+    width: 100%;
+}
+dialog button {
+    display: block;
+    margin: auto;
+}
+
+a {
+    color: #006fd7;
+    transition: color .2s;
+}
+a:hover {
+    color: #0059ac;
+}
+
+.question {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: solid 1px #ccc;
+}
+.question:first-child {
+    padding-top: .5rem;
+}
+.question:last-child {
+    margin-bottom: 1rem;
+}
+
+.fill-form .question label {
+    font-size: 1.1rem;
+    margin-bottom: .2rem;
+    display: block;
+}
+.fill-form .question[data-type="short_text"] input {
+    width: 25rem;
+}
+
+.edit-form input#title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+.edit-form .question input {
+    font-size: 1.1rem;
+    width: 30rem;
+    margin-bottom: .5rem;
+}

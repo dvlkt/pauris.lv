@@ -1,27 +1,29 @@
-<style>
-    label {
-        display: block;
-        min-height: 1rem;
-        min-width: 10rem;
-    }
-</style>
+{% extends "base.html" %}
 
-<h1 id="title" contenteditable>Jauna veidlapa</h1>
+{% block title %}Jauna veidlapa{% endblock %}
 
-<div id="form"></div>
+{% block content %}
 
-<button onclick="add_field('short_text')">+ īsa teksta lauks</button>
+<main class="edit-form">
+    <input id="title" placeholder="Veidlapas virsraksts" value="Jauna veidlapa" />
 
-<button onclick="publishDialog.showModal()">Izveidot</button>
+    <div id="form"></div>
 
-<p>&copy; portāls (forums?) Pauris.lv, 2025</p>
+    <button onclick="add_field()">+ Pievienot jautājumu</button>
+
+    <button class="centered" onclick="publishDialog.showModal()">Izveidot</button>
+</main>
+
+<footer>
+    <p>&copy; pauris.lv, 2025.</p>
+</footer>
 
 <dialog id="publish-dialog">
     <p>
         Izveidojiet paroli, lai pēc tam varētu piekļūtu veidlapas rezultātiem:
     </p>
 
-    <input type="text" id="password" />
+    <input type="password" id="password" />
 
     <button onclick="create()">Izveidot</button>
 </dialog>
@@ -30,16 +32,17 @@
     let publishDialog = document.querySelector("dialog#publish-dialog");
     let form = document.querySelector("#form");
 
-    const add_field = (type) => {
+    const add_field = () => {
         let id = Math.floor(Math.random() * 1000000);
 
-        if (type === "short_text") {
-            form.innerHTML += `
-                <div class="question" id="${id}" data-type="short_text">
-                    <p contenteditable>Jautājums</p>
-                </div>
-            `;
-        }
+        form.innerHTML += `
+            <div class="question" id="${id}">
+                <input type="text" placeholder="Jautājums" value="Jautājums #${form.children.length + 1}">
+                <select>
+                    <option data-type="short_text">Īss teksta lauks</option>
+                </select>
+            </div>
+        `;
     };
 
     const create = () => {
@@ -47,15 +50,15 @@
         for (let element of document.querySelectorAll(".question")) {
             data.push({
                 id: element.id,
-                type: element.getAttribute("data-type"),
-                text: element.querySelector("p").innerText,
+                type: element.querySelector(`option:nth-child(${element.querySelector("select").selectedIndex+1})`).getAttribute("data-type"),
+                text: element.querySelector("input").value,
             });
         }
         fetch("/api/create_form", {
             method: "POST",
             headers: new Headers({ "content-type": "application/json" }),
             body: JSON.stringify({
-                name: document.querySelector("#title").innerText,
+                name: document.querySelector("#title").value,
                 password: document.querySelector("#password").value,
                 questions: data,
             }),
@@ -67,3 +70,5 @@
         });
     };
 </script>
+
+{% endblock %}

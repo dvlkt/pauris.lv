@@ -1,26 +1,28 @@
-<style>
-    input {
-        display: block;
-        margin-bottom: 1.5rem;
-    }
-</style>
+{% extends "base.html" %}
 
-<button onclick="loginDialog.showModal()">Rediģēt</button>
+{% block title %}{{ name }}{% endblock %}
 
-<h1>{{ name }}</h1>
+{% block content %}
 
-<div id="form"></div>
+<main class="fill-form">
+    <h1>{{ name }}</h1>
 
-<button onclick="submit()">Iesniegt</button>
+    <div id="form"></div>
 
-<p>
-    Izveidots, izmantojot
-    <a href="{{ url_for('home') }}">pauris.lv veidlapu veidotāju</a>. &copy;2025
-</p>
+    <button onclick="submit()">Iesniegt</button>
+    <button onclick="loginDialog.showModal()">Rediģēt</button>
+</main>
+
+<footer>
+    <p>
+        Izveidots, izmantojot
+        <a href="{{ url_for('home') }}">pauris.lv veidlapu veidotāju</a>.
+    </p>
+</footer>
 
 <dialog id="login">
     <p>Lai rediģētu veidlapu, ievadi paroli:</p>
-    <input type="text" id="password" />
+    <input type="password" id="password" value="" />
     <button onclick="login()">Rediģēt</button>
 </dialog>
 
@@ -32,8 +34,10 @@
     for (let i = 0; i < data.length; i++) {
         if (data[i].type == "short_text") {
             form.innerHTML += `
-                <label for="${data[i].id}">${data[i].text}</label>
-                <input name="${data[i].id}" type="text" />
+                <div class="question" data-type="${data[i].type}">
+                    <label for="${data[i].id}">${data[i].text}</label>
+                    <input name="${data[i].id}" type="text" />
+                </div>
             `;
         }
     }
@@ -70,3 +74,5 @@
         });
     }
 </script>
+
+{% endblock %}
