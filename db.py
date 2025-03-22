@@ -56,3 +56,7 @@ def register_answer(form_id, answers):
     id = random.randrange(1000000000, 9999999999)
     c.execute("""INSERT INTO answers (id, form_id, data) VALUES (?, ?, ?);""", (id, form_id, data))
     db.commit()
+
+def get_form_answers(id):
+    result = c.execute("""SELECT data FROM answers WHERE form_id=?;""", [id])
+    return [json.loads(i[0]) for i in result.fetchall()]
