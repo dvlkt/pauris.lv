@@ -9,7 +9,7 @@ app.config.from_object(__name__)
 def create_form():
     data = flask.request.json
     if data == None:
-        return flask.redirect(flask.url_for("home"))
+        return '{"successful": false, "id": null}'
 
     id = db.create_form(data["name"], data["password"], data["questions"])
     return '{"successful": true, "id": "'+id+'"}'
@@ -18,10 +18,10 @@ def create_form():
 def edit_form():
     data = flask.request.json
     if data == None:
-        return flask.redirect(flask.url_for("home"))
+        return '{"successful": false}'
 
     if 'id' not in flask.session or flask.session['id'] != id:
-        return flask.redirect(flask.url_for("home"))
+        return '{"successful": false}'
 
     db.modify_form(data["id"], data["name"], data["questions"])
     return '{"successful": true}'
@@ -47,7 +47,7 @@ def logout():
 def fill_form():
     data = flask.request.json
     if data == None:
-        return flask.redirect(flask.url_for("home"))
+        return '{"successful": false}'
 
     db.register_answer(data["id"], data["answers"])
     return '{"successful": true}'

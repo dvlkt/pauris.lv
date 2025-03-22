@@ -4,13 +4,14 @@
 
 {% block content %}
 
+<button class="corner" onclick="loginDialog.showModal()">Rediģēt</button>
+
 <main class="fill-form">
     <h1>{{ name }}</h1>
 
-    <div id="form"></div>
+    <div id="questions"></div>
 
     <button onclick="submit()">Iesniegt</button>
-    <button onclick="loginDialog.showModal()">Rediģēt</button>
 </main>
 
 <footer>
@@ -23,31 +24,35 @@
 <dialog id="login">
     <p>Lai rediģētu veidlapu, ievadi paroli:</p>
     <input type="password" id="password" value="" />
-    <button onclick="login()">Rediģēt</button>
+
+    <div class="btn-wrapper">
+        <button onclick="login()">Rediģēt</button>
+        <button onclick="loginDialog.close()">Atcelt</button>
+    </div>
 </dialog>
 
 <script type="text/javascript">
     let loginDialog = document.querySelector("dialog#login");
 
     let data = {{ questions|tojson }};
-    let form = document.querySelector("#form");
+    let questionWrapper = document.querySelector("#questions");
     for (let i = 0; i < data.length; i++) {
         if (data[i].type == "short_text") {
-            form.insertAdjacentHTML("beforeend", `
+            questionWrapper.insertAdjacentHTML("beforeend", `
                 <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
                     <label for="${data[i].id}">${data[i].text}</label>
                     <input id="${data[i].id}" name="${data[i].id}" type="text" />
                 </div>
             `);
         } else if (data[i].type == "long_text") {
-            form.insertAdjacentHTML("beforeend", `
+            questionWrapper.insertAdjacentHTML("beforeend", `
                 <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
                     <label for="${data[i].id}">${data[i].text}</label>
                     <textarea id="${data[i].id}" name="${data[i].id}" type="text"></textarea>
                 </div>
             `);
         } else if (data[i].type == "multiple_choice" || data[i].type == "checkbox") {
-            form.insertAdjacentHTML("beforeend", `
+            questionWrapper.insertAdjacentHTML("beforeend", `
                 <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
                     <label>${data[i].text}</label>
                     <div class="options"></div>

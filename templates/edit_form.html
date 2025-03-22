@@ -1,57 +1,135 @@
-<style>
-    label {
-        display: block;
-        min-height: 1rem;
-        min-width: 10rem;
-    }
-</style>
+{% extends "base.html" %}
 
-<button onclick="logout()"><- Iziet no rediģēšanas</button>
+{% block title %}Rediģēt "{{ name }}"{% endblock %}
 
-<h1 id="title" contenteditable>{{ name }}</h1>
+{% block content %}
 
-<div id="form"></div>
+<button class="corner" onclick="logout()">Iziet</button>
 
-<button onclick="add_field('short_text')">+ īsa teksta lauks</button>
+<main class="edit-form">
+    <input id="title" placeholder="Veidlapas virsraksts" value="{{ name }}" />
+    <h1 id="title" value="{{ name }}">{{ name }}</h1>
 
-<button onclick="save()">Saglabāt</button>
+    <div class="tab-wrapper">
+        <button class="tab" id="editBtn" onclick="openTab('edit')">Jautājumi</button><button class="tab" id="dataBtn" onclick="openTab('data')">Atbildes</button>
+    </div>
+
+    <div id="edit">
+        <div id="questions"></div>
+
+        <button onclick="addQuestion()">+ Pievienot jautājumu</button>
+
+        <button class="centered" onclick="save()">Saglabāt</button>
+    </div>
+
+    <div id="data">
+        <p>Šeit Doņeckis ieliks ka var apskatīties atbildes un kkādu statistiku saistībā ar tām</p>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; pauris.lv, 2025.</p>
+</footer>
 
 <script type="text/javascript">
     let data = {{ questions|tojson }};
-    let form = document.querySelector("#form")
-    for (let i = 0; i < data.length; i++) {
-        if (data[i].type == "short_text") {
-            form.innerHTML += `
-                <div class="question" id="${data[i].id}" data-type="short_text">
-                    <p contenteditable>${data[i].text}</p>
+    let questionWrapper = document.querySelector("#questions");
+
+    const addQuestion = () => {
+        let id = Math.floor(Math.random() * 1000000);
+
+        questionWrapper.insertAdjacentHTML("beforeend", `
+            <div class="question" data-id="${id}" data-type="short_text">
+                <input type="text" placeholder="Jautājums" value="Jautājums #${questionWrapper.children.length + 1}">
+
+                <select onchange="onQuestionTypeChange(${id})">
+                    <option data-type="short_text">Īss teksta lauks</option>
+                    <option data-type="long_text">Garš teksta lauks</option>
+                    <option data-type="multiple_choice">Izvēles varianti</option>
+                    <option data-type="checkbox">Izvēles rūtiņas</option>
+                </select>
+
+                <div class="question-options">
+                    <div></div>
+                    <button onclick="addOption(${id})">+ Jauna izvēle</button>
                 </div>
-            `;
+            </div>
+        `);
+
+        onQuestionTypeChange(id);
+    };
+
+    const onQuestionTypeChange = (id) => {
+        let dataType = document.querySelector(`.question[data-id="${id}"] option:nth-child(${document.querySelector(`.question[data-id="${id}"] select`).selectedIndex+1})`).getAttribute("data-type");
+        document.querySelector(`.question[data-id="${id}"]`).setAttribute("data-type", dataType);
+
+        if (dataType == "multiple_choice" || dataType == "checkbox") {
+            document.querySelector(`.question[data-id="${id}"] .question-options`).style.display = "block";
+        } else {
+            document.querySelector(`.question[data-id="${id}"] .question-options`).style.display = "none";
         }
     }
 
-    const add_field = (type) => {
-        let id = Math.floor(Math.random() * 1000000);
+    const addOption = (id) => {
+        let optionsWrapper = document.querySelector(`.question[data-id="${id}"] .question-options div`);
+        optionsWrapper.insertAdjacentHTML("beforeend", `
+            <input placeholder="Izvēle" value="Izvēle #${optionsWrapper.children.length + 1}" />
+        `);
+    }
 
-        if (type === "short_text") {
-            form.innerHTML += `
-                <div class="question" id="${id}" data-type="short_text">
-                    <p contenteditable>Jautājums</p>
+    for (let i = 0; i < data.length; i++) {
+        questionWrapper.insertAdjacentHTML("beforeend", `
+            <div class="question" data-id="${data[i].id}" data-type="short_text">
+                <input type="text" placeholder="Jautājums" value="${data[i].text}">
+
+                <select onchange="onQuestionTypeChange(${data[i].id})">
+                    <option data-type="short_text" ${data[i].type == "short_text" ? "selected" : ""}>Īss teksta lauks</option>
+                    <option data-type="long_text" ${data[i].type == "long_text" ? "selected" : ""}>Garš teksta lauks</option>
+                    <option data-type="multiple_choice" ${data[i].type == "multiple_choice" ? "selected" : ""}>Izvēles varianti</option>
+                    <option data-type="checkbox" ${data[i].type == "checkbox" ? "selected" : ""}>Izvēles rūtiņas</option>
+                </select>
+
+                <div class="question-options">
+                    <div></div>
+                    <button onclick="addOption(${data[i].id})">+ Jauna izvēle</button>
                 </div>
-            `;
+            </div>
+        `);
+
+        onQuestionTypeChange(data[i].id);
+
+        if (data[i].type != "multiple_choice" && data[i].type != "checkbox") continue;
+
+        let optionsWrapper = questionWrapper.querySelector(`.question[data-id="${data[i].id}"] .question-options div`);
+        for (let o = 0; o < data[i].options.length; o++) {
+            optionsWrapper.insertAdjacentHTML("beforeend", `
+                <input placeholder="Izvēle" value="${data[i].options[o]}" />
+            `);
         }
-    };
+
+    }
 
     const save = () => {
-        let data = [];
+        let saveData = [];
         for (let element of document.querySelectorAll(".question")) {
-            data.push({
-                id: element.id,
+            let question = {
+                id: element.getAttribute("data-id"),
                 type: element.getAttribute("data-type"),
-                text: element.querySelector("p").innerText,
-            });
+                text: element.querySelector("input").value,
+            };
+            if (question.type == "multiple_choice" || question.type == "checkbox") {
+                let options = [];
+                for (let optionElement of element.querySelectorAll(".question-options input")) {
+                    options.push(optionElement.value);
+                }
+                question.options = options;
+            }
+            saveData.push(question);
         }
         fetch("/api/edit_form", {
             method: "POST",
+            mode: "cors",
+            credentials: "include",
             headers: new Headers({ "content-type": "application/json" }),
             body: JSON.stringify({
                 id: "{{ id }}",
@@ -71,4 +149,25 @@
             window.location.reload();
         });
     }
+
+    const openTab = (tab) => {
+        if (tab == "edit") {
+            document.querySelector("#editBtn").classList.add("selected");
+            document.querySelector("#dataBtn").classList.remove("selected");
+            document.querySelector("#edit").style.display = "block";
+            document.querySelector("input#title").style.display = "block";
+            document.querySelector("#data").style.display = "none";
+            document.querySelector("h1#title").style.display = "none";
+        } else if (tab == "data") {
+            document.querySelector("#editBtn").classList.remove("selected");
+            document.querySelector("#dataBtn").classList.add("selected");
+            document.querySelector("#edit").style.display = "none";
+            document.querySelector("input#title").style.display = "none";
+            document.querySelector("#data").style.display = "block";
+            document.querySelector("h1#title").style.display = "block";
+        }
+    }
+    openTab("edit");
 </script>
+
+{% endblock %}

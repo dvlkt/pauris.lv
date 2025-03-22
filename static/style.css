@@ -95,9 +95,10 @@ dialog input {
     margin-bottom: .5rem;
     width: 100%;
 }
-dialog button {
-    display: block;
-    margin: auto;
+dialog .btn-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
 }
 
 a {
@@ -106,6 +107,41 @@ a {
 }
 a:hover {
     color: #0059ac;
+}
+
+.tab-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+button.tab {
+    position: relative;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+    background: #fff;
+    color: #606060;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #d3d3d3;
+}
+button.tab.selected, button.tab:hover {
+    color: #262626;
+    border-bottom: 2px solid #808080;
+}
+button.tab.selected:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    background: #808080;
+    left: 0;
+    bottom: -3px;
+}
+
+button.corner {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
 }
 
 .question {
@@ -147,6 +183,10 @@ a:hover {
 .edit-form input#title {
     font-size: 2.5rem;
     font-weight: bold;
+    margin-bottom: 1rem;
+}
+.edit-form h1#title {
+    margin-top: 1.4rem;
     margin-bottom: 1rem;
 }
 .edit-form .question input {
