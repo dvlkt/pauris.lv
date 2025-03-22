@@ -50,6 +50,7 @@ def fill_form():
         return '{"successful": false}'
 
     db.register_answer(data["id"], data["answers"])
+    flask.session['done'] = 'true' # This is a very temporary session cookie just to show the "Thank you" page
     return '{"successful": true}'
 
 @app.route('/')
@@ -61,6 +62,9 @@ def form(id):
     if db.form_exists(id):
         if 'id' in flask.session and flask.session['id'] == id:
             return flask.render_template('edit_form.html', id=id, name=db.get_form_name(id), questions=db.get_form_questions(id))
+        elif 'done' in flask.session:
+            flask.session.pop('done', None)
+            return flask.render_template('thank_you.html', name=db.get_form_name(id))
         else:
             return flask.render_template('fill_form.html', id=id, name=db.get_form_name(id), questions=db.get_form_questions(id))
     else:

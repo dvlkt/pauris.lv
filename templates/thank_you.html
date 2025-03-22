@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{{ name }}{% endblock %}
+
+{% block content %}
+
+<main>
+    <h1>Paldies par aizpildīšanu!</h1>
+</main>
+
+<footer>
+    <p>
+        Izveido pats savu veidlapu, izmantojot
+        <a href="{{ url_for('home') }}">pauris.lv veidlapu veidotāju</a>.
+    </p>
+</footer>
+
+{% endblock %}

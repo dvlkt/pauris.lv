@@ -99,6 +99,11 @@
                 id: "{{ id }}",
                 answers
             }),
+        }).then(async (res) => {
+            let result = await res.json();
+            if (result.successful) {
+                window.location.reload();
+            }
         });
     }
 
