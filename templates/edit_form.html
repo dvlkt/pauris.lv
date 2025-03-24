@@ -19,6 +19,8 @@
 
         <button onclick="addQuestion()">+ Pievienot jautājumu</button>
 
+        <p class="error"></p>
+
         <button class="centered" onclick="save()">Saglabāt</button>
     </div>
 
@@ -44,6 +46,11 @@
                 <input type="text" placeholder="Jautājums" value="Jautājums #${questionWrapper.children.length + 1}">
                 <button onclick="removeQuestion(${id})" class="icon"><img src="{{ url_for('static', filename='icons/trash.svg') }}" /></button>
                 <br />
+
+                <div class="required-check">
+                    <input id="${id}-required" type="checkbox" />
+                    <label for="${id}-required">Obligāts jautājums</label>
+                </div>
 
                 <select onchange="onQuestionTypeChange(${id})">
                     <option data-type="short_text">Īss teksta lauks</option>
@@ -78,6 +85,12 @@
         } else {
             document.querySelector(`.question[data-id="${id}"] .question-options`).style.display = "none";
         }
+
+        if (dataType == "text") {
+            document.querySelector(`.question[data-id="${id}"] .required-check`).style.display = "none";
+        } else {
+            document.querySelector(`.question[data-id="${id}"] .required-check`).style.display = "block";
+        }
     }
 
     const addOption = (id) => {
@@ -102,6 +115,11 @@
                 <input type="text" placeholder="Jautājums" value="${data[i].text}">
                 <button onclick="removeQuestion(${data[i].id})" class="icon"><img src="{{ url_for('static', filename='icons/trash.svg') }}" /></button>
                 <br />
+
+                <div class="required-check">
+                    <input id="${data[i].id}-required" type="checkbox" ${data[i].required ? "checked" : ""} />
+                    <label for="${data[i].id}-required">Obligāts jautājums</label>
+                </div>
 
                 <select onchange="onQuestionTypeChange(${data[i].id})">
                     <option data-type="short_text" ${data[i].type == "short_text" ? "selected" : ""}>Īss teksta lauks</option>
@@ -143,6 +161,7 @@
             let question = {
                 id: element.getAttribute("data-id"),
                 type: element.getAttribute("data-type"),
+                required: element.querySelector(".required-check input").checked,
                 text: element.querySelector("input").value,
             };
             if (question.type == "multiple_choice" || question.type == "checkbox") {
@@ -151,7 +170,7 @@
                     options.push(optionElement.value);
                 }
                 question.options = options;
-                question.customOption = element.querySelector(`input.other-option`).checked;
+                question.customOption = element.querySelector("input.other-option").checked;
             }
             saveData.push(question);
         }
@@ -167,7 +186,11 @@
             let response = await res.json();
             if (response.successful) {
                 window.location.reload();
+            } else {
+                document.querySelector("#edit p.error").innerText = result.error;
             }
+        }).catch(() => {
+            document.querySelector("#edit p.error").innerText = "Nevarēja savienoties ar serveri!";
         });
     };
 

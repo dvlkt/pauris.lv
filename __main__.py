@@ -1,3 +1,4 @@
+from pydoc import stripid
 import flask
 import db
 import json
@@ -9,25 +10,25 @@ app.config.from_file('config.json', load=json.load)
 def create_form():
     data = flask.request.json
     if data == None:
-        return '{"successful": false, "id": null}'
+        return '{"successful": false, "error": "Notika kļūda!", "id": null}'
     id = db.create_form(data['name'], data['password'], data['questions'])
     if id == False:
-        return '{"successful": false, "id": null}'
-    return '{"successful": true, "id": "'+id+'"}'
+        return '{"successful": false, "error": "Notika kļūda!", "id": null}'
+    return '{"successful": true, "error": null, "id": "'+id+'"}'
 
 @app.route('/api/edit_form', methods=['POST'])
 def edit_form():
     data = flask.request.json
     if data == None:
-        return '{"successful": false}'
+        return '{"successful": false, "error": "Notika kļūda!"}'
 
     if 'id' not in flask.session or flask.session['id'] != data['id']:
-        return '{"successful": false}'
+        return '{"successful": false, "error": "Notika kļūda!"}'
 
     if db.modify_form(data['id'], data['name'], data['questions']):
-        return '{"successful": true}'
+        return '{"successful": true, "error": null}'
     else:
-        return '{"successful": false}'
+        return '{"successful": false, "error": "Notika kļūda!"}'
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -50,12 +51,26 @@ def logout():
 def fill_form():
     data = flask.request.json
     if data == None:
-        return '{"successful": false}'
+        return '{"successful": false, "error": "Notika kļūda!"}'
+
+    # Jāpārbauda iegūtie dati
+    if not data["id"]:
+        return '{"successful": false, "error": "Notika kļūda!"}'
+
+    questions = db.get_form_questions(data["id"])
+    if not questions:
+        return '{"successful": false, "error": "Notika kļūda!"}'
+
+    for q in questions:
+        if not data["answers"].get(q["id"]).strip() and q["required"]:
+            return '{"successful": false, "error": "Jāaizpilda visi obligātie jautājumi!"}'
+
+    # Atbilde jāsaglabā datubāzē
     if db.register_answer(data['id'], data['answers']):
-        flask.session['done'] = 'true' # This is a very temporary session cookie just to show the "Thank you" page
-        return '{"successful": true}'
+        flask.session['done'] = 'true' # Ļoti īslaicīga sīkdatne, lai parādītu "paldies par aizpildīšanu" lapu
+        return '{"successful": true, "error": null}'
     else:
-        return '{"successful": false}'
+        return '{"successful": false, "error": "Notika kļūda!"}'
 
 @app.route('/')
 def home():

@@ -11,6 +11,8 @@
 
     <div id="questions"></div>
 
+    <p class="error"></p>
+
     <button onclick="submit()">Iesniegt</button>
 </main>
 
@@ -43,6 +45,7 @@
             questionWrapper.insertAdjacentHTML("beforeend", `
                 <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
                     <label for="${data[i].id}">${data[i].text}</label>
+                    ${data[i].required ? `<p class="required">*</p>` : ""}
                     <input id="${data[i].id}" name="${data[i].id}" type="text" />
                 </div>
             `);
@@ -50,6 +53,7 @@
             questionWrapper.insertAdjacentHTML("beforeend", `
                 <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
                     <label for="${data[i].id}">${data[i].text}</label>
+                    ${data[i].required ? `<p class="required">*</p>` : ""}
                     <textarea id="${data[i].id}" name="${data[i].id}" type="text"></textarea>
                 </div>
             `);
@@ -57,6 +61,7 @@
             questionWrapper.insertAdjacentHTML("beforeend", `
                 <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
                     <label>${data[i].text}</label>
+                    ${data[i].required ? `<p class="required">*</p>` : ""}
                     <div class="options"></div>
                 </div>
             `);
@@ -100,7 +105,9 @@
                 val = questionElement.querySelector(`textarea`).value;
             } else if (type == "multiple_choice") {
                 let checked = questionElement.querySelector(`.options input:checked`);
-                if (checked.getAttribute("data-other")) { // Pielāgotas atbildes opcijā "Cita atbilde:"
+                if (!checked) {
+                    val = "";
+                } else if (checked.getAttribute("data-other")) { // Pielāgotas atbildes opcijā "Cita atbilde:"
                     val = document.getElementById(`${checked.id}-input`).value;
                 } else {
                     val = questionElement.querySelector(`.options label[for="${checked.id}"]`).innerText;
@@ -129,7 +136,11 @@
             let result = await res.json();
             if (result.successful) {
                 window.location.reload();
+            } else {
+                document.querySelector(".fill-form p.error").innerText = result.error;
             }
+        }).catch(() => {
+            document.querySelector(".fill-form p.error").innerText = "Nevarēja savienoties ar serveri!";
         });
     }
 

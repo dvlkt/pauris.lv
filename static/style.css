@@ -169,7 +169,7 @@ button.icon {
 .fill-form .question label {
     font-size: 1.1rem;
     margin-bottom: .2rem;
-    display: block;
+    display: inline-block;
 }
 .fill-form .question[data-type="short_text"] input {
     width: 50%;
@@ -196,6 +196,12 @@ button.icon {
     display: inline-block;
     margin-left: .3rem;
     margin-top: .4rem;
+}
+.fill-form .required {
+    display: inline-block;
+    font-weight: 500;
+    font-size: 1.2rem;
+    color: #d51717;
 }
 
 .edit-form input#title {
@@ -226,6 +232,10 @@ button.icon {
 }
 .edit-form .question .question-options .option button {
     display: inline-block;
+}
+.edit-form .question label {
+    display: inline-block;
+    margin-bottom: .5rem;
 }
 
 p.error {
