@@ -9,3 +9,5 @@ Lai palaistu kodu, nepieciešams izveidot ```config.json``` failu, kur iekšā j
   "SECRET_KEY": "12345"
 }
 ```
+
+Ikonas paņemtas no [https://icons.getbootstrap.com](https://icons.getbootstrap.com)

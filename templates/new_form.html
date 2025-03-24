@@ -41,6 +41,8 @@
         questionWrapper.insertAdjacentHTML("beforeend", `
             <div class="question" data-id="${id}" data-type="short_text">
                 <input type="text" placeholder="Jautājums" value="Jautājums #${questionWrapper.children.length + 1}">
+                <button onclick="removeQuestion(${id})" class="icon"><img src="{{ url_for('static', filename='icons/trash.svg') }}" /></button>
+                <br />
 
                 <select onchange="onQuestionTypeChange(${id})">
                     <option data-type="short_text">Īss teksta lauks</option>
@@ -62,6 +64,10 @@
         onQuestionTypeChange(id);
     };
 
+    const removeQuestion = (id) => {
+        questionWrapper.removeChild(questionWrapper.querySelector(`[data-id="${id}"]`));
+    }
+
     const onQuestionTypeChange = (id) => {
         let dataType = document.querySelector(`.question[data-id="${id}"] option:nth-child(${document.querySelector(`.question[data-id="${id}"] select`).selectedIndex+1})`).getAttribute("data-type");
         document.querySelector(`.question[data-id="${id}"]`).setAttribute("data-type", dataType);
@@ -75,9 +81,18 @@
 
     const addOption = (id) => {
         let optionsWrapper = document.querySelector(`.question[data-id="${id}"] .question-options div`);
+        let optionID = Math.floor(Math.random() * 1000000);
         optionsWrapper.insertAdjacentHTML("beforeend", `
-            <input placeholder="Izvēle" type="text" value="Izvēle #${optionsWrapper.children.length + 1}" />
+            <div class="option" data-id="${optionID}">
+                <input placeholder="Izvēle" type="text" value="Izvēle #${optionsWrapper.children.length + 1}" />
+                <button onclick="removeOption(${optionID})" class="icon"><img src="{{ url_for('static', filename='icons/trash.svg') }}" /></button>
+            </div>
         `);
+    }
+
+    const removeOption = (id) => {
+        let option = questionWrapper.querySelector(`.question-options [data-id="${id}"]`);
+        option.parentNode.removeChild(option);
     }
 
     const create = () => {
