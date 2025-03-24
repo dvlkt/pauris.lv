@@ -62,13 +62,28 @@
             `);
             let element = document.querySelector(`.question[data-id="${data[i].id}"]`);
             for (let o = 0; o < data[i].options.length; o++) {
-                let optionId = Math.random() * 100000000;
+                let optionId = Math.floor(Math.random() * 100000000)  ;
                 element.querySelector(".options").insertAdjacentHTML("beforeend", `
                     <input type="${data[i].type == "multiple_choice" ? "radio" : "checkbox"}" id="${optionId}" name="${data[i].id}" />
                     <label for="${optionId}">${data[i].options[o]}</label>
                     <br />
                 `);
             }
+            if (data[i].customOption) {
+                let optionId = Math.floor(Math.random() * 100000000);
+                element.querySelector(".options").insertAdjacentHTML("beforeend", `
+                    <input type="${data[i].type == "multiple_choice" ? "radio" : "checkbox"}" id="${optionId}" name="${data[i].id}" data-other="true" />
+                    <label for="${optionId}">Cita atbilde:</label>
+                    <input id="${optionId}-input" type="text" name="${data[i].id}" onfocus="document.getElementById('${optionId}').checked = true;" class="other-answer" />
+                    <br />
+                `);
+            }
+        } else if (data[i].type == "text") {
+            questionWrapper.insertAdjacentHTML("beforeend", `
+                <div class="question" data-type="${data[i].type}" data-id="${data[i].id}">
+                    <p>${data[i].text}</p>
+                </div>
+            `);
         }
     }
 
@@ -84,11 +99,20 @@
             } else if (type == "long_text") {
                 val = questionElement.querySelector(`textarea`).value;
             } else if (type == "multiple_choice") {
-                val = questionElement.querySelector(`.options label[for="${questionElement.querySelector(`.options input:checked`).id}"]`).innerText;
+                let checked = questionElement.querySelector(`.options input:checked`);
+                if (checked.getAttribute("data-other")) { // Pielāgotas atbildes opcijā "Cita atbilde:"
+                    val = document.getElementById(`${checked.id}-input`).value;
+                } else {
+                    val = questionElement.querySelector(`.options label[for="${checked.id}"]`).innerText;
+                }
             } else if (type == "checkbox") {
                 val = [];
                 for (let checked of questionElement.querySelectorAll(`.options input:checked`)) {
-                    val.push(questionElement.querySelector(`.options label[for="${checked.id}"]`).innerText);
+                    if (checked.getAttribute("data-other")) {
+                        val.push(document.getElementById(`${checked.id}-input`).value);
+                    } else {
+                        val.push(questionElement.querySelector(`.options label[for="${checked.id}"]`).innerText);
+                    }
                 }
             }
 

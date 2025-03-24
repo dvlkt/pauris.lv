@@ -5,7 +5,7 @@
 {% block content %}
 
 <main class="edit-form">
-    <input id="title" placeholder="Veidlapas virsraksts" value="Jauna veidlapa" />
+    <input id="title" type="text" placeholder="Veidlapas virsraksts" value="Jauna veidlapa" />
 
     <div id="questions"></div>
 
@@ -47,11 +47,14 @@
                     <option data-type="long_text">Garš teksta lauks</option>
                     <option data-type="multiple_choice">Izvēles varianti</option>
                     <option data-type="checkbox">Izvēles rūtiņas</option>
+                    <option data-type="text">Paskaidrojošs teksts</option>
                 </select>
 
                 <div class="question-options">
                     <div></div>
                     <button onclick="addOption(${id})">+ Jauna izvēle</button>
+                    <input id="${id}-other-option" class="other-option" type="checkbox" />
+                    <label for="${id}-other-option">Ļaut ievadīt citu atbildi</label>
                 </div>
             </div>
         `);
@@ -73,7 +76,7 @@
     const addOption = (id) => {
         let optionsWrapper = document.querySelector(`.question[data-id="${id}"] .question-options div`);
         optionsWrapper.insertAdjacentHTML("beforeend", `
-            <input placeholder="Izvēle" value="Izvēle #${optionsWrapper.children.length + 1}" />
+            <input placeholder="Izvēle" type="text" value="Izvēle #${optionsWrapper.children.length + 1}" />
         `);
     }
 
@@ -87,10 +90,11 @@
             };
             if (question.type == "multiple_choice" || question.type == "checkbox") {
                 let options = [];
-                for (let optionElement of element.querySelectorAll(".question-options input")) {
+                for (let optionElement of element.querySelectorAll(".question-options input[type=text]")) {
                     options.push(optionElement.value);
                 }
                 question.options = options;
+                question.customOption = element.querySelector(`input.other-option`).checked;
             }
             data.push(question);
         }

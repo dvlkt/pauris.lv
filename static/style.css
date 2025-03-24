@@ -32,7 +32,7 @@ h1 {
     font-size: 2.5rem;
     font-weight: bold;
 }
-input, select, textarea {
+input[type="text"], select, textarea {
     font-size: 1rem;
     padding: .3rem .5rem;
     border: solid 1px #d3d3d3;
@@ -49,15 +49,15 @@ select:hover {
     background: #f5f5f5;
     cursor: pointer;
 }
-input:focus, textarea:focus {
+input[type="text"]:focus, textarea:focus {
     outline: none;
     border: solid 1px #2c99ff;
     box-shadow: 0 .07rem .4rem 0 #d0d0d080;
 }
-input::placeholder, textarea::placeholder {
+input[type="text"]::placeholder, textarea::placeholder {
     color: #808080;
 }
-input:disabled, select:disabled, textarea:disabled {
+input[type="text"]:disabled, select:disabled, textarea:disabled {
     opacity: .75;
 }
 
@@ -168,11 +168,18 @@ button.corner {
     width: 80%;
     resize: vertical;
 }
+.fill-form .question[data-type="text"]:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
 .fill-form .question .options {
     margin-left: 2rem;
 }
 .fill-form .question .options input {
     display: inline-block;
+}
+.fill-form .question .options input.other-answer {
+    margin-left: .2rem;
 }
 .fill-form .question .options label {
     display: inline-block;
@@ -189,7 +196,7 @@ button.corner {
     margin-top: 1.4rem;
     margin-bottom: 1rem;
 }
-.edit-form .question input {
+.edit-form .question input[type="text"] {
     font-size: 1.1rem;
     width: 30rem;
     margin-bottom: .5rem;
@@ -197,6 +204,9 @@ button.corner {
 .edit-form .question .question-options {
     margin-top: .5rem;
     padding-left: 3rem;
+}
+.edit-form .question .question-options input[type="checkbox"] {
+    margin-left: 1rem;
 }
 
 p.error {

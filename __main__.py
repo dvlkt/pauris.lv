@@ -13,7 +13,7 @@ def create_form():
     id = db.create_form(data['name'], data['password'], data['questions'])
     if id == False:
         return '{"successful": false, "id": null}'
-    return '{"successful": false, "id": "'+id+'"}'
+    return '{"successful": true, "id": "'+id+'"}'
 
 @app.route('/api/edit_form', methods=['POST'])
 def edit_form():
