@@ -1,9 +1,9 @@
 import flask
 import db
+import json
 
 app = flask.Flask(__name__)
-app.secret_key = b'1234' # TEMPORARY, SHOULD SWITCH TO ENV VAR
-app.config.from_object(__name__)
+app.config.from_file('config.json', load=json.load)
 
 @app.route('/api/create_form', methods=['POST'])
 def create_form():
