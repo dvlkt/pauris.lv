@@ -25,6 +25,8 @@
     <p>Lai rediģētu veidlapu, ievadi paroli:</p>
     <input type="password" id="password" value="" />
 
+    <p class="error"></p>
+
     <div class="btn-wrapper">
         <button onclick="login()">Rediģēt</button>
         <button onclick="loginDialog.close()">Atcelt</button>
@@ -119,6 +121,8 @@
             response = await res.json();
             if (response.successful) {
                 window.location.reload();
+            } else {
+                document.querySelector("dialog#login p.error").innerText = "Ievadītā parole nav pareiza!";
             }
         });
     }

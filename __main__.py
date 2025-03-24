@@ -24,8 +24,10 @@ def edit_form():
     if 'id' not in flask.session or flask.session['id'] != data['id']:
         return '{"successful": false}'
 
-    db.modify_form(data['id'], data['name'], data['questions'])
-    return '{"successful": true}'
+    if db.modify_form(data['id'], data['name'], data['questions']):
+        return '{"successful": true}'
+    else:
+        return '{"successful": false}'
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -33,11 +35,11 @@ def login():
     if data == None:
         return flask.redirect(flask.url_for('home'))
 
-    if not db.verify_form_password(data['id'], data['password']):
-        return '{"successful": false}'
-    else:
+    if db.verify_form_password(data['id'], data['password']):
         flask.session['id'] = data['id']
         return '{"successful": true}'
+    else:
+        return '{"successful": false}'
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
@@ -49,10 +51,11 @@ def fill_form():
     data = flask.request.json
     if data == None:
         return '{"successful": false}'
-
-    db.register_answer(data['id'], data['answers'])
-    flask.session['done'] = 'true' # This is a very temporary session cookie just to show the "Thank you" page
-    return '{"successful": true}'
+    if db.register_answer(data['id'], data['answers']):
+        flask.session['done'] = 'true' # This is a very temporary session cookie just to show the "Thank you" page
+        return '{"successful": true}'
+    else:
+        return '{"successful": false}'
 
 @app.route('/')
 def home():

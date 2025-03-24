@@ -198,3 +198,9 @@ button.corner {
     margin-top: .5rem;
     padding-left: 3rem;
 }
+
+p.error {
+    color: #d51717;
+    font-weight: 500;
+    margin-bottom: .5rem;
+}
