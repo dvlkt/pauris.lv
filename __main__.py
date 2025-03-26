@@ -5,9 +5,9 @@ import base64
 import json
 import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.use('Agg')
 import pandas as pd
-from matplotlib.ticker import MaxNLocator
+
+matplotlib.use('Agg')
 
 app = flask.Flask(__name__)
 app.config.from_file('config.json', load=json.load)
@@ -68,8 +68,15 @@ def fill_form():
         return '{"successful": false, "error": "Notika kļūda!"}'
 
     for q in questions:
-        if not data["answers"].get(q["id"]).strip() and q["required"]:
-            return '{"successful": false, "error": "Jāaizpilda visi obligātie jautājumi!"}'
+        if q.get("id") == None:
+            return '{"successful": false, "error": "Notika kļūda!"}'
+        if q["required"]:
+            invalid_response = '{"successful": false, "error": "Jāaizpilda visi obligātie jautājumi!"}'
+            if q["id"] not in data["answers"]:
+                return invalid_response
+            if q["type"] != "checkbox":
+                if not data["answers"][q["id"]].strip():
+                    return invalid_response
 
     # Atbilde jāsaglabā datubāzē
     if db.register_answer(data['id'], data['answers']):
@@ -96,12 +103,24 @@ def form(id):
         return flask.redirect(flask.url_for('home'))
 
 @app.route('/api/get_form_answers/<id>', methods=['GET'])
-def form_aswers(id):
+def form_answers(id):
+    if 'id' not in flask.session or flask.session['id'] != id:
+        return '{"successful": false}'
+
     answers = db.get_form_answers(id)  # Get answers from the database
     questions = db.get_form_questions(id)
-    
+
     if not answers:
         return '{"successful": false}'
+
+    if not questions:
+        return '{"successful": false}'
+
+    # Using Pandas because we have to
+    df_answers = pd.DataFrame(answers)
+    df_questions = pd.DataFrame(questions)
+
+    text_data = {} # Store text answers for free text field questions
 
     # Prepare data for Pie charts (based on multiple_choice)
     pie_data = {}  # Store pie charts per multiple-choice question
@@ -110,39 +129,34 @@ def form_aswers(id):
     hist_data = {}  # Store histograms per checkbox question
 
     # Mapping question IDs to their types (e.g., 'multiple_choice', 'checkbox')
-    question_types = {question['id']: question['type'] for question in questions}
+    question_types = df_questions.set_index('id')['type'].to_dict()
 
     # Mapping question IDs to the actual question text
-    question_texts = {question['id']: question['text'] for question in questions}
+    question_texts = df_questions.set_index('id')['text'].to_dict()
 
     # Loop through answers and create separate charts for each question type
-    for answer_set in answers:
-        for question_id, answer_type in question_types.items():
-            if answer_type == 'multiple_choice':  # For multiple_choice questions
-                pie_answer = answer_set.get(str(question_id))
-                if pie_answer:
-                    if question_id not in pie_data:
-                        pie_data[question_id] = {}
-                    if pie_answer not in pie_data[question_id]:
-                        pie_data[question_id][pie_answer] = 0
-                    pie_data[question_id][pie_answer] += 1
+    for question_id, answer_type in question_types.items():
+        if not str(question_id) in df_answers: # Avoid errors when no answers are in
+            continue
 
-            elif answer_type == 'checkbox':  # For checkbox questions
-                checkbox_answers = answer_set.get(str(question_id), [])
-                for checkbox_answer in checkbox_answers:
-                    if question_id not in hist_data:
-                        hist_data[question_id] = {}
-                    if checkbox_answer not in hist_data[question_id]:
-                        hist_data[question_id][checkbox_answer] = 0
-                    hist_data[question_id][checkbox_answer] += 1
-    
+        if answer_type == 'multiple_choice':  # For multiple_choice questions
+            counts = df_answers[str(question_id)].dropna().value_counts().to_dict()
+            pie_data[question_id] = counts
+
+        elif answer_type == 'checkbox':  # For checkbox questions
+            exploded = df_answers[str(question_id)].explode().dropna()
+            counts = exploded.value_counts().to_dict()
+            hist_data[question_id] = counts
+
+        elif answer_type in ['short_text', 'long_text']: # For text questions
+            responses = df_answers[str(question_id)].dropna().tolist()
+            text_data[question_id] = {"question": question_texts[question_id], "responses": responses}
+
     # Generate Pie charts for multiple_choice questions
     pie_charts = {}
     for question_id, answer_counts in pie_data.items():
-        print(f"Generating Pie Chart for Question {question_id}")
-        print(answer_counts)  # This prints the answer counts for each question_id
         question_text = question_texts.get(question_id, f"Question {question_id}")
-        
+
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.pie(answer_counts.values(), labels=answer_counts.keys(), autopct='%1.1f%%', startangle=90)
         ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle
@@ -161,7 +175,7 @@ def form_aswers(id):
         ax.bar(checkbox_answers.keys(), checkbox_answers.values())
         ax.set_title(f"{question_text}")
         ax.set_ylabel('Number of Responses')
-        
+
         img = io.BytesIO()
         plt.savefig(img, format='png')
         img.seek(0)
@@ -170,12 +184,9 @@ def form_aswers(id):
     # Return the pie charts and histograms as base64 images
     return json.dumps({
         "successful": True,
+        "text_answers": text_data,
         "pie_charts": pie_charts,  # Each pie chart for a multiple-choice question
         "histograms": histograms  # Each histogram for a checkbox question
     })
 
-    # answers = db.get_form_answers(id)
-    # if answers == False:
-    #     return json.dumps({"successful": False})
-    # return json.dumps({"successful": True, "answers": answers})
 app.run(debug=True)

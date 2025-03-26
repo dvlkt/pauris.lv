@@ -25,7 +25,10 @@
     </div>
 
     <div id="data">
-        <h2>Statistika par Putnu ar Bumbāb (aptauju)</h2>
+        <h2 style="text-align: center;">Atbildes uz aptauju</h2>
+        <div id="text-answer-container"></div>
+
+        <h2 style="text-align: center;">Aptaujas statistika</h2>
         <div class="data_row">
             <!-- Container for pie charts (multiple_choice questions) -->
             <div id="pie-chart-container"></div>
@@ -232,28 +235,40 @@
         const data = await response.json();
 
         if (data.successful) {
-                // Dynamically add pie charts for multiple-choice questions
-                const pieChartContainer = document.getElementById("pie-chart-container");
-                for (const questionId in data.pie_charts) {
-                    const pieChartImg = data.pie_charts[questionId];
-                    const pieChartElement = document.createElement("div");
-                    pieChartElement.classList.add("chart");
-                    pieChartElement.innerHTML = `<img src="data:image/png;base64,${pieChartImg}" alt="Pie Chart for Question ${questionId}">`;
-                    pieChartContainer.appendChild(pieChartElement);
-                }
+            // Dynamically add text answers
+            const textAnswerContainer = document.getElementById("text-answer-container");
+            for (const questionId in data.text_answers) {
+                textAnswerContainer.insertAdjacentHTML("beforeend", `<p>${data.text_answers[questionId].question}</p>`);
 
-                // Dynamically add histograms for checkbox questions
-                const histogramsContainer = document.getElementById("histograms-container");
-                for (const questionId in data.histograms) {
-                    const histogramImg = data.histograms[questionId];
-                    const histogramElement = document.createElement("div");
-                    histogramElement.classList.add("chart");
-                    histogramElement.innerHTML = `<img src="data:image/png;base64,${histogramImg}" alt="Histogram for Question ${questionId}">`;
-                    histogramsContainer.appendChild(histogramElement);
+                let responseListElement = document.createElement("ul");
+                for (let i = 0; i < data.text_answers[questionId].responses.length; i++) {
+                    responseListElement.insertAdjacentHTML("beforeend", `<li>${data.text_answers[questionId].responses[i]}</li>`);
                 }
-            } else {
-                console.error("Failed to load the data.");
+                textAnswerContainer.appendChild(responseListElement);
             }
+
+            // Dynamically add pie charts for multiple-choice questions
+            const pieChartContainer = document.getElementById("pie-chart-container");
+            for (const questionId in data.pie_charts) {
+                const pieChartImg = data.pie_charts[questionId];
+                const pieChartElement = document.createElement("div");
+                pieChartElement.classList.add("chart");
+                pieChartElement.innerHTML = `<img src="data:image/png;base64,${pieChartImg}" alt="Pie Chart for Question ${questionId}">`;
+                pieChartContainer.appendChild(pieChartElement);
+            }
+
+            // Dynamically add histograms for checkbox questions
+            const histogramsContainer = document.getElementById("histograms-container");
+            for (const questionId in data.histograms) {
+                const histogramImg = data.histograms[questionId];
+                const histogramElement = document.createElement("div");
+                histogramElement.classList.add("chart");
+                histogramElement.innerHTML = `<img src="data:image/png;base64,${histogramImg}" alt="Histogram for Question ${questionId}">`;
+                histogramsContainer.appendChild(histogramElement);
+            }
+        } else {
+            console.error("Failed to load the data.");
+        }
     }
 </script>
 

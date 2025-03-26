@@ -251,3 +251,12 @@ p.error {
     justify-content: center;
     gap: 40px;
 }
+
+#text-answer-container p {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: .2rem;
+}
+#text-answer-container ul {
+    margin-bottom: 1rem;
+}
