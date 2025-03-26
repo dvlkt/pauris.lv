@@ -243,3 +243,11 @@ p.error {
     font-weight: 500;
     margin-bottom: .5rem;
 }
+
+
+.data_row {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    gap: 40px;
+}

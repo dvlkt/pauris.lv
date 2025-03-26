@@ -25,7 +25,14 @@
     </div>
 
     <div id="data">
-        <p>Šeit Doņeckis ieliks ka var apskatīties atbildes un kkādu statistiku saistībā ar tām</p>
+        <h2>Statistika par Putnu ar Bumbāb (aptauju)</h2>
+        <div class="data_row">
+            <!-- Container for pie charts (multiple_choice questions) -->
+            <div id="pie-chart-container"></div>
+
+            <!-- Container for histograms (checkbox questions) -->
+            <div id="histograms-container"></div>
+        </div>
     </div>
 </main>
 
@@ -218,6 +225,36 @@
         }
     }
     openTab("edit");
+
+    // ------------ GRAFIKI ---------------
+    window.onload = async () => {
+        const response = await fetch("/api/get_form_answers/{{ id }}");
+        const data = await response.json();
+
+        if (data.successful) {
+                // Dynamically add pie charts for multiple-choice questions
+                const pieChartContainer = document.getElementById("pie-chart-container");
+                for (const questionId in data.pie_charts) {
+                    const pieChartImg = data.pie_charts[questionId];
+                    const pieChartElement = document.createElement("div");
+                    pieChartElement.classList.add("chart");
+                    pieChartElement.innerHTML = `<img src="data:image/png;base64,${pieChartImg}" alt="Pie Chart for Question ${questionId}">`;
+                    pieChartContainer.appendChild(pieChartElement);
+                }
+
+                // Dynamically add histograms for checkbox questions
+                const histogramsContainer = document.getElementById("histograms-container");
+                for (const questionId in data.histograms) {
+                    const histogramImg = data.histograms[questionId];
+                    const histogramElement = document.createElement("div");
+                    histogramElement.classList.add("chart");
+                    histogramElement.innerHTML = `<img src="data:image/png;base64,${histogramImg}" alt="Histogram for Question ${questionId}">`;
+                    histogramsContainer.appendChild(histogramElement);
+                }
+            } else {
+                console.error("Failed to load the data.");
+            }
+    }
 </script>
 
 {% endblock %}
