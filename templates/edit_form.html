@@ -25,6 +25,9 @@
     </div>
 
     <div id="data">
+        <button style="margin-bottom: 1rem;" onclick="downloadCSV()">Lejupielādēt CSV...</button>
+        <button style="margin-bottom: 1rem;" onclick="uploadCSVdialog.showModal()">Augšupielādēt CSV...</button>
+
         <h2 style="text-align: center;">Atbildes uz aptauju</h2>
         <div id="text-answer-container"></div>
 
@@ -39,14 +42,20 @@
     </div>
 </main>
 
+<dialog id="upload-csv">
+    <p>Augšupielādēt CSV failu (eksistējošie dati tiks izdzēsti):</p>
+    <input type="file" />
+    <button onclick="uploadCSV()">Augšupielādēt</button>
+</dialog>
+
 <footer>
     <p>&copy; pauris.lv, 2025.</p>
 </footer>
 
 <script type="text/javascript">
     let data = {{ questions|tojson }};
-
     let questionWrapper = document.querySelector("#questions");
+    let uploadCSVdialog = document.querySelector("#upload-csv");
 
     const addQuestion = () => {
         let id = Math.floor(Math.random() * 1000000);
@@ -227,7 +236,7 @@
             document.querySelector("h1#title").style.display = "block";
         }
     }
-    openTab("edit");
+    openTab("data");
 
     // ------------ GRAFIKI ---------------
     window.onload = async () => {
@@ -269,6 +278,25 @@
         } else {
             console.error("Failed to load the data.");
         }
+    }
+
+    /******** CSV data ********/
+    const downloadCSV = () => {
+        window.location.href = "/api/download_csv/{{ id }}";
+    }
+    const uploadCSV = () => {
+        let fileUpload = uploadCSVdialog.querySelector("input");
+        let data = new FormData();
+        data.append("file", fileUpload.files[0]);
+        fetch("/api/upload_csv/{{ id }}", {
+            method: "POST",
+            body: data
+        }).then(async (res) => {
+            let result = await res.json();
+            if (result.successful) {
+                window.location.reload();
+            }
+        });
     }
 </script>
 

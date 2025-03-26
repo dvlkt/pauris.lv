@@ -87,6 +87,13 @@ def get_form_answers(id):
     except:
         return False
 
+def remove_form_answers(id):
+    try:
+        c.execute("""DELETE FROM answers WHERE form_id=?;""", [id])
+        return True
+    except:
+        return False
+
 """
 Ja neeksistē, jāizveido tabulas
 """

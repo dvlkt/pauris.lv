@@ -189,4 +189,54 @@ def form_answers(id):
         "histograms": histograms  # Each histogram for a checkbox question
     })
 
+@app.route('/api/download_csv/<id>', methods=['GET'])
+def download_csv(id):
+    if 'id' not in flask.session or flask.session['id'] != id:
+        return '{"successful": false}'
+
+    answers = db.get_form_answers(id)
+    questions = db.get_form_questions(id)
+    if not answers or not questions:
+        return '{"successful": false}'
+
+    # Use Pandas to create a CSV file
+    df_answers = pd.DataFrame(answers)
+
+    csv = io.StringIO()
+    df_answers.to_csv(csv, index=False)
+    csv.seek(0)
+
+    # Create response with CSV file
+    return flask.send_file(
+        io.BytesIO(csv.getvalue().encode('utf-8')),
+        as_attachment=True,
+        download_name=f'{id}.csv'
+    )
+
+@app.route('/api/upload_csv/<id>', methods=['POST'])
+def upload_csv(id):
+    if 'id' not in flask.session or flask.session['id'] != id:
+        return '{"successful": false, "error": "Notika kļūda!"}'
+
+    if 'file' not in flask.request.files:
+        return '{"successful": false}'
+
+    file = flask.request.files['file']
+    df = pd.read_csv(file)
+
+    answers = df.to_dict(orient='records')
+
+    # Convert strings to objects
+    for i in answers:
+        for o in i.keys():
+            if isinstance(i[o], str) and i[o].strip().startswith("["):
+                i[o] = json.loads(i[o].replace("'", '"'))
+
+    # Upload everything to DB
+    db.remove_form_answers(id)
+    for i in answers:
+        db.register_answer(id, i)
+
+    return '{"successful": true}'
+
 app.run(debug=True)
