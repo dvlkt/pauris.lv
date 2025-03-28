@@ -30,10 +30,10 @@
         <button style="margin-bottom: 1rem;" onclick="downloadCSV()">Lejupielādēt CSV...</button>
         <button style="margin-bottom: 1rem;" onclick="uploadCSVdialog.showModal()">Augšupielādēt CSV...</button>
 
-        <h2 style="text-align: center;">Atbildes uz aptauju</h2>
+        <h2 id="answers-title" style="text-align: center;">Atbildes uz aptauju</h2>
         <div id="text-answer-container"></div>
 
-        <h2 style="text-align: center;">Aptaujas statistika</h2>
+        <h2 id="graph-title" style="text-align: center;">Aptaujas statistika</h2>
         <div class="data_row">
             <!-- Konteineris apļveida diagrammām (multiple_choice jautājumi) -->
             <div id="pie-chart-container"></div>
@@ -282,12 +282,19 @@
                 histogramElement.innerHTML = `<img src="data:image/png;base64,${histogramImg}" alt="Histogram for Question ${questionId}">`;
                 histogramsContainer.appendChild(histogramElement);
             }
+            
+            if (pieChartContainer.children.length == 0 && histogramsContainer.children.length == 0) {
+                document.getElementById("graph-title").style.display = "none";
+            }
+            if (Object.keys(data.text_answers).length == 0) {
+                document.getElementById("answers-title").style.display = "none";
+            }
         } else {
             console.error("Failed to load the data.");
         }
     }
 
-    /******** CSV data ********/
+    /******** CSV dati ********/
     const downloadCSV = () => {
         window.location.href = "/api/download_csv/{{ id }}";
     }
