@@ -40,6 +40,8 @@
 
     let data = {{ questions|tojson }};
     let questionWrapper = document.querySelector("#questions");
+
+    // Jautājumu pievienošana lapai
     for (let i = 0; i < data.length; i++) {
         if (data[i].type == "short_text") {
             questionWrapper.insertAdjacentHTML("beforeend", `
@@ -94,7 +96,7 @@
 
     const submit = () => {
         let answers = {};
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 0; i < data.length; i++) { // Iziet cauri visiem atbilžu elementiem un saliek atbildes JSON formātā
             let questionElement = document.querySelector(`.question[data-id="${data[i].id}"]`);
             let type = questionElement.getAttribute("data-type");
             let val;

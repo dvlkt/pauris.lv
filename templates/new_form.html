@@ -37,6 +37,7 @@
     let publishDialog = document.querySelector("dialog#publish-dialog");
     let questionWrapper = document.querySelector("#questions");
 
+    // Jautājuma pievienošana
     const addQuestion = () => {
         let id = Math.floor(Math.random() * 1000000);
 
@@ -75,6 +76,7 @@
         questionWrapper.removeChild(questionWrapper.querySelector(`[data-id="${id}"]`));
     }
 
+    // Jautājuma veida nomainīšana
     const onQuestionTypeChange = (id) => {
         let dataType = document.querySelector(`.question[data-id="${id}"] option:nth-child(${document.querySelector(`.question[data-id="${id}"] select`).selectedIndex+1})`).getAttribute("data-type");
         document.querySelector(`.question[data-id="${id}"]`).setAttribute("data-type", dataType);
@@ -92,6 +94,7 @@
         }
     }
 
+    // Izvēļu pievienošana checkbox/multiple_choice jautājumiem
     const addOption = (id) => {
         let optionsWrapper = document.querySelector(`.question[data-id="${id}"] .question-options div`);
         let optionID = Math.floor(Math.random() * 1000000);
@@ -110,7 +113,7 @@
 
     const create = () => {
         let data = [];
-        for (let element of document.querySelectorAll(".question")) {
+        for (let element of document.querySelectorAll(".question")) { // Iziet cauri visiem jautājumu elementiem un sastāda saglabājamos datus
             let question = {
                 id: element.getAttribute("data-id"),
                 type: element.getAttribute("data-type"),

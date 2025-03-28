@@ -14,6 +14,7 @@
         <button class="tab" id="editBtn" onclick="openTab('edit')">Jautājumi</button><button class="tab" id="dataBtn" onclick="openTab('data')">Atbildes</button>
     </div>
 
+    <!-- Veidlapas rediģēšana -->
     <div id="edit">
         <div id="questions"></div>
 
@@ -24,6 +25,7 @@
         <button class="centered" onclick="save()">Saglabāt</button>
     </div>
 
+    <!-- Atbildes uz jautājumiem -->
     <div id="data">
         <button style="margin-bottom: 1rem;" onclick="downloadCSV()">Lejupielādēt CSV...</button>
         <button style="margin-bottom: 1rem;" onclick="uploadCSVdialog.showModal()">Augšupielādēt CSV...</button>
@@ -33,10 +35,10 @@
 
         <h2 style="text-align: center;">Aptaujas statistika</h2>
         <div class="data_row">
-            <!-- Container for pie charts (multiple_choice questions) -->
+            <!-- Konteineris apļveida diagrammām (multiple_choice jautājumi) -->
             <div id="pie-chart-container"></div>
 
-            <!-- Container for histograms (checkbox questions) -->
+            <!-- Konteineris histogrammām (checkbox jautājumi) -->
             <div id="histograms-container"></div>
         </div>
     </div>
@@ -57,6 +59,7 @@
     let questionWrapper = document.querySelector("#questions");
     let uploadCSVdialog = document.querySelector("#upload-csv");
 
+    // Jautājumu pievienošana
     const addQuestion = () => {
         let id = Math.floor(Math.random() * 1000000);
 
@@ -95,6 +98,7 @@
         questionWrapper.removeChild(questionWrapper.querySelector(`[data-id="${id}"]`));
     }
 
+    // Jautājuma veida nomainīšana
     const onQuestionTypeChange = (id) => {
         let dataType = document.querySelector(`.question[data-id="${id}"] option:nth-child(${document.querySelector(`.question[data-id="${id}"] select`).selectedIndex+1})`).getAttribute("data-type");
         document.querySelector(`.question[data-id="${id}"]`).setAttribute("data-type", dataType);
@@ -112,6 +116,7 @@
         }
     }
 
+    // Izvēļu pievienošana checkbox/multiple_choice jautājumiem
     const addOption = (id) => {
         let optionsWrapper = document.querySelector(`.question[data-id="${id}"] .question-options div`);
         let optionID = Math.floor(Math.random() * 1000000);
@@ -128,6 +133,7 @@
         option.parentNode.removeChild(option);
     }
 
+    // Eksistējošu jautājumu pievienošana
     for (let i = 0; i < data.length; i++) {
         questionWrapper.insertAdjacentHTML("beforeend", `
             <div class="question" data-id="${data[i].id}" data-type="short_text">
@@ -176,7 +182,7 @@
 
     const save = () => {
         let saveData = [];
-        for (let element of document.querySelectorAll(".question")) {
+        for (let element of document.querySelectorAll(".question")) { // Iziet cauri visiem jautājumu elementiem un sastāda saglabājamos datus
             let question = {
                 id: element.getAttribute("data-id"),
                 type: element.getAttribute("data-type"),
@@ -219,6 +225,7 @@
         });
     }
 
+    // Pārslēgšanās starp jautājumiem/atbilžu datiem
     const openTab = (tab) => {
         if (tab == "edit") {
             document.querySelector("#editBtn").classList.add("selected");

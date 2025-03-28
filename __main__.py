@@ -17,7 +17,9 @@ def create_form():
     data = flask.request.json
     if data == None:
         return '{"successful": false, "error": "Notika kļūda!", "id": null}'
+
     id = db.create_form(data['name'], data['password'], data['questions'])
+
     if id == False:
         return '{"successful": false, "error": "Notika kļūda!", "id": null}'
     return '{"successful": true, "error": null, "id": "'+id+'"}'
@@ -41,7 +43,7 @@ def login():
     data = flask.request.json
     if data == None:
         return flask.redirect(flask.url_for('home'))
-
+    # Ja parole pareiza, jāizveido sesija
     if db.verify_form_password(data['id'], data['password']):
         flask.session['id'] = data['id']
         return '{"successful": true}'
@@ -67,6 +69,7 @@ def fill_form():
     if not questions:
         return '{"successful": false, "error": "Notika kļūda!"}'
 
+    # Pārbauda, vai obligātie jautājumi ir aizpildīti
     for q in questions:
         if q.get("id") == None:
             return '{"successful": false, "error": "Notika kļūda!"}'
@@ -92,14 +95,14 @@ def home():
 @app.route('/<id>')
 def form(id):
     if db.form_exists(id):
-        if 'id' in flask.session and flask.session['id'] == id:
+        if 'id' in flask.session and flask.session['id'] == id: # Ja ir sesijas sīkdatne ar attiecīgo ID, lietotājam jāļauj formu rediģēt
             return flask.render_template('edit_form.html', id=id, name=db.get_form_name(id), questions=db.get_form_questions(id))
-        elif 'done' in flask.session:
+        elif 'done' in flask.session: # "Paldies" lapa strādā ar īslaicīgu "done" sīkdatni
             flask.session.pop('done', None)
             return flask.render_template('thank_you.html', name=db.get_form_name(id))
-        else:
+        else: # Ja nav sīkdatņu, jārāda parastā veidlapas aizpildīšanas lapa
             return flask.render_template('fill_form.html', id=id, name=db.get_form_name(id), questions=db.get_form_questions(id))
-    else:
+    else: # Būtībā 404
         return flask.redirect(flask.url_for('home'))
 
 @app.route('/api/get_form_answers/<id>', methods=['GET'])
