@@ -67,10 +67,13 @@ def fill_form():
     if not questions:
         return '{"successful": false, "error": "Notika kļūda!"}'
 
+    # Pārbauda, vai obligātie jautājumi ir aizpildīti
     for q in questions:
         if q.get("id") == None:
             return '{"successful": false, "error": "Notika kļūda!"}'
         if q["required"]:
+            if q["type"] == "text":
+                continue
             invalid_response = '{"successful": false, "error": "Jāaizpilda visi obligātie jautājumi!"}'
             if q["id"] not in data["answers"]:
                 return invalid_response
@@ -110,7 +113,7 @@ def form_answers(id):
     answers = db.get_form_answers(id)  # Get answers from the database
     questions = db.get_form_questions(id)
 
-    if not answers:
+    if answers == False:
         return '{"successful": false}'
 
     if not questions:
